@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { Loader2 } from "lucide-react";
@@ -16,7 +16,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-export default function VerifyCodePage() {
+function VerifyCodeForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const email = searchParams.get("email") || "";
@@ -109,5 +109,13 @@ export default function VerifyCodePage() {
         )}
       </CardContent>
     </Card>
+  );
+}
+
+export default function VerifyCodePage() {
+  return (
+    <Suspense>
+      <VerifyCodeForm />
+    </Suspense>
   );
 }

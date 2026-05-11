@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "sonner";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -15,12 +15,15 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+export const viewport: Viewport = {
+  themeColor: "#0b1736",
+};
+
 export const metadata: Metadata = {
   title: "Vruta — Find Your Chavruta.",
   description:
     "Connect with Jewish learners for chavruta study based on shared interests, mutual availability, and location. Find your study partner and grow together.",
   applicationName: "Vruta",
-  themeColor: "#0b1736",
   icons: {
     icon: [
       { url: "/favicon/favicon-32x32.png", sizes: "32x32", type: "image/png" },
