@@ -16,6 +16,12 @@ const publicRoutes = ["/", "/signin", "/waitlist", "/api/auth"];
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  if (
+    !pathname.startsWith("/coming-soon") &&
+    process.env.COMING_SOON == "true"
+  ) {
+    return NextResponse.redirect(new URL("/coming-soon", request.url));
+  }
   // Allow public routes and API routes
   if (
     publicRoutes.some(
