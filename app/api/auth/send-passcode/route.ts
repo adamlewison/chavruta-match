@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return NextResponse.json(
         { error: "Invalid email address" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -39,13 +39,13 @@ export async function POST(req: NextRequest) {
     await resend.emails.send({
       from: process.env.RESEND_FROM_EMAIL || "onboarding@resend.dev",
       to: email,
-      subject: "Your ChavrutaMatch Sign-in Code",
+      subject: "Your Vruta Sign-in Code",
       html: `
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-          <h2 style="color: #333;">Your Sign-in Code</h2>
-          <p style="font-size: 18px;">Enter this code to sign in to ChavrutaMatch:</p>
+          <h2 style="color: #1a1f3a;">Your Sign-in Code</h2>
+          <p style="font-size: 18px;">Enter this code to sign in to Vruta:</p>
           <div style="background-color: #f5f5f5; padding: 20px; text-align: center; border-radius: 8px; margin: 20px 0;">
-            <span style="font-size: 32px; font-weight: bold; letter-spacing: 8px; color: #007bff;">${code}</span>
+            <span style="font-size: 32px; font-weight: bold; letter-spacing: 8px; color: #7c3aed;">${code}</span>
           </div>
           <p style="color: #666; font-size: 14px;">This code will expire in 10 minutes.</p>
           <p style="color: #666; font-size: 14px;">If you didn't request this, you can safely ignore this email.</p>
@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
     console.error("Error sending passcode:", error);
     return NextResponse.json(
       { error: "Failed to send passcode" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

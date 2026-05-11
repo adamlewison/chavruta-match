@@ -16,9 +16,43 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ChavrutaMatch — Find Your Study Partner",
+  title: "Vruta — Find Your Chavruta.",
   description:
-    "Match with Jewish learners for chavruta study based on shared interests, mutual availability, and location.",
+    "Connect with Jewish learners for chavruta study based on shared interests, mutual availability, and location. Find your study partner and grow together.",
+  applicationName: "Vruta",
+  themeColor: "#0b1736",
+  icons: {
+    icon: [
+      { url: "/favicon/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/favicon/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: "/favicon/favicon.ico", rel: "shortcut icon" },
+    ],
+    apple: "/favicon/apple-touch-icon.png",
+  },
+  manifest: "/favicon/site.webmanifest",
+  openGraph: {
+    title: "Vruta — Find Your Chavruta. Grow Together.",
+    description:
+      "Connect with Jewish learners for chavruta study based on shared interests, mutual availability, and location.",
+    type: "website",
+    url: "https://vruta.app",
+    siteName: "Vruta",
+    images: [
+      {
+        url: "/favicon/android-chrome-512x512.png",
+        width: 512,
+        height: 512,
+        alt: "Vruta logo",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Vruta — Find Your Chavruta. Grow Together.",
+    description:
+      "Connect with Jewish learners for chavruta study based on shared interests, mutual availability, and location.",
+    images: ["/favicon/android-chrome-512x512.png"],
+  },
 };
 
 export default function RootLayout({

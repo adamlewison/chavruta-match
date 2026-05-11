@@ -1,99 +1,102 @@
 import Link from "next/link";
-import { BookOpen, Users, MessageSquare, ArrowRight } from "lucide-react";
+import { ArrowRight, BookOpen, MessageSquare, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Logo } from "@/components/logo";
 
-const features = [
+const highlights = [
   {
     icon: BookOpen,
-    title: "Create Tentacles",
-    description:
-      "Each tentacle represents a subject you want to study — Gemora, Chumash, Daf Yomi, and more. Add your availability and find the right match.",
+    title: "Create slots",
+    detail: "Share what you study and when you are free.",
   },
   {
     icon: Users,
-    title: "Get Matched",
-    description:
-      "Our matching algorithm finds partners with the same interests and overlapping availability in your area. Ranked by compatibility.",
+    title: "Match instantly",
+    detail: "See curated chavruta matches nearby.",
   },
   {
     icon: MessageSquare,
-    title: "Connect & Learn",
-    description:
-      "Send a connection request. Once accepted, a private chat opens between you. Arrange your first session and start learning together.",
+    title: "Plan together",
+    detail: "Send a quick invite and confirm your session.",
   },
 ];
 
 export default function HomePage() {
   return (
-    <div className="flex flex-col min-h-screen">
-      {/* Header */}
-      <header className="border-b">
-        <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
-          <div className="flex items-center gap-2 font-bold text-lg">
-            <BookOpen className="h-5 w-5 text-primary" />
-            ChavrutaMatch
-          </div>
+    <div className="flex min-h-screen flex-col bg-[#f7f9fc] text-[#0f172a]">
+      <header className="border-b border-slate-200 bg-white/90 backdrop-blur">
+        <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-4">
+          <Logo size={32} />
           <Link href="/signin">
-            <Button size="sm">Sign in</Button>
+            <Button size="sm" variant="outline">
+              Sign in
+            </Button>
           </Link>
         </div>
       </header>
 
-      {/* Hero */}
-      <section className="flex-1 flex items-center justify-center px-4 py-20">
-        <div className="mx-auto max-w-3xl text-center">
-          <h1 className="text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
-            Find your{" "}
-            <span className="text-primary">chavruta</span>
-          </h1>
-          <p className="mt-4 text-lg text-muted-foreground sm:text-xl max-w-2xl mx-auto">
-            A chavruta is a study partner — someone who challenges you, keeps you
-            accountable, and helps Torah come alive. ChavrutaMatch pairs you with
-            the right one based on what you want to learn, when you&apos;re free,
-            and where you are.
-          </p>
-          <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
-            <Link href="/signin">
-              <Button size="lg" className="gap-2 w-full sm:w-auto">
-                Get started
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-            </Link>
-          </div>
-          <p className="mt-4 text-sm text-muted-foreground">
-            Currently available in London. More cities coming soon.
-          </p>
-        </div>
-      </section>
-
-      {/* Features */}
-      <section className="border-t bg-muted/30 px-4 py-16">
-        <div className="mx-auto max-w-5xl">
-          <h2 className="text-2xl font-bold text-center mb-10">How it works</h2>
-          <div className="grid gap-8 sm:grid-cols-3">
-            {features.map((feature) => (
-              <div
-                key={feature.title}
-                className="flex flex-col items-center text-center"
+      <main className="flex-1">
+        <section className="relative isolate overflow-hidden rounded-b-[40px] bg-gradient-to-br from-[#eef2ff] via-white to-[#dff7ff] px-6 py-16 sm:px-10">
+          <div className="relative mx-auto flex max-w-4xl flex-col gap-10 text-center">
+            <p className="text-sm uppercase tracking-[0.3em] text-cyan-700">
+              New look
+            </p>
+            <h1 className="text-4xl font-black leading-tight text-[#0b1736] sm:text-5xl lg:text-6xl">
+              Find your{" "}
+              <span className="bg-gradient-to-r from-purple-500 to-cyan-500 bg-clip-text text-transparent">
+                chavruta
+              </span>
+              .
+              <span className="block text-4xl text-slate-600">
+                Grow together.
+              </span>
+            </h1>
+            <p className="text-lg text-slate-600">
+              Match with someone who makes Torah come alive — in a few taps.
+            </p>
+            <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+              <Link href="/signin">
+                <Button className="gap-2" size="lg">
+                  Get started
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </Link>
+              <Link
+                href="/waitlist"
+                className="text-sm font-semibold text-cyan-700"
               >
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 mb-4">
-                  <feature.icon className="h-6 w-6 text-primary" />
+                Not in your area yet?
+              </Link>
+            </div>
+            <div className="flex justify-center gap-6 text-xs uppercase tracking-[0.3em] text-slate-500">
+              <span>London</span>
+              <span>Coming soon: NYC · TLV</span>
+            </div>
+          </div>
+        </section>
+
+        <section className="mx-auto flex max-w-5xl flex-col gap-10 px-4 py-14">
+          <div className="grid gap-4 sm:grid-cols-3">
+            {highlights.map((highlight) => (
+              <div
+                key={highlight.title}
+                className="flex flex-col items-start gap-3 rounded-3xl border border-slate-200 bg-white px-5 py-6 text-left shadow-[0_20px_60px_rgba(15,23,42,0.08)]"
+              >
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-500 to-cyan-500 text-white">
+                  <highlight.icon className="h-5 w-5" />
                 </div>
-                <h3 className="font-semibold text-lg">{feature.title}</h3>
-                <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-                  {feature.description}
-                </p>
+                <h3 className="text-lg font-semibold text-[#0f172a]">
+                  {highlight.title}
+                </h3>
+                <p className="text-sm text-slate-600">{highlight.detail}</p>
               </div>
             ))}
           </div>
-        </div>
-      </section>
+        </section>
+      </main>
 
-      {/* Footer */}
-      <footer className="border-t px-4 py-6">
-        <div className="mx-auto max-w-5xl text-center text-sm text-muted-foreground">
-          ChavrutaMatch &copy; {new Date().getFullYear()}
-        </div>
+      <footer className="border-t border-slate-200 bg-white/80 px-4 py-8 text-center text-sm text-slate-600">
+        Vruta {new Date().getFullYear()}
       </footer>
     </div>
   );

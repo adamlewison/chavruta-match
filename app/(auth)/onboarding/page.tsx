@@ -2,10 +2,13 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useSession } from "next-auth/react";
-import { BookOpen, Upload, Camera, Loader2 } from "lucide-react";
+import Link from "next/link";
+import { Upload, Camera, Loader2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { LogoMark } from "@/components/logo";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Card,
   CardContent,
@@ -21,8 +24,10 @@ import { resizeImage } from "@/lib/image-utils";
 import {
   saveOnboardingProfile,
   saveOnboardingGender,
+  saveOnboardingBio,
   saveOnboardingLocation,
   completeOnboarding,
+  searchSynagogues,
 } from "@/app/actions/onboarding";
 
 const STEPS = [
@@ -32,8 +37,12 @@ const STEPS = [
       "Add your name and profile picture so study partners can recognise you.",
   },
   {
-    title: "Tell us about you",
+    title: "Confirm your gender",
     description: "This helps us tailor matching and recommendations.",
+  },
+  {
+    title: "Introduce yourself",
+    description: "Help potential study partners get to know you.",
   },
   {
     title: "Where are you based?",
@@ -41,9 +50,9 @@ const STEPS = [
       "We use your postcode to match you with nearby study partners.",
   },
   {
-    title: "Community affiliation",
+    title: "Your community",
     description:
-      "Which shul or beis medrash are you most closely affiliated with?",
+      "We verify members through their shul to keep Vruta safe and trusted.",
   },
 ];
 
@@ -183,15 +192,78 @@ function Step2Gender({ loading, onBack, onSubmit }: Step2Props) {
   );
 }
 
-// --- Step 3: Location ---
+// --- Step 3: Bio ---
 
-interface Step3Props {
+interface Step3BioProps {
+  bio: string;
+  loading: boolean;
+  onBack: () => void;
+  onSkip: () => void;
+  onBioChange: (value: string) => void;
+  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
+}
+
+function Step3Bio({
+  bio,
+  loading,
+  onBack,
+  onSkip,
+  onBioChange,
+  onSubmit,
+}: Step3BioProps) {
+  return (
+    <form onSubmit={onSubmit} className="flex flex-col gap-4">
+      <div className="space-y-2">
+        <Textarea
+          id="bio"
+          name="bio"
+          placeholder="e.g. I'm passionate about Gemara and love diving into complex sugyas..."
+          value={bio}
+          onChange={(event) => onBioChange(event.target.value)}
+          maxLength={300}
+          disabled={loading}
+          className="min-h-24"
+        />
+        <p className="text-xs text-muted-foreground">
+          Optional — helps others see if you're a good match
+        </p>
+      </div>
+      <div className="flex gap-3">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onBack}
+          disabled={loading}
+          className="flex-1"
+        >
+          Back
+        </Button>
+        <Button type="submit" disabled={loading} className="flex-1">
+          {loading ? "Saving..." : "Continue"}
+        </Button>
+      </div>
+      <Button
+        type="button"
+        variant="ghost"
+        onClick={onSkip}
+        disabled={loading}
+        className="w-full"
+      >
+        Skip for now
+      </Button>
+    </form>
+  );
+}
+
+// --- Step 4: Location ---
+
+interface Step4Props {
   loading: boolean;
   onBack: () => void;
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
 }
 
-function Step3Location({ loading, onBack, onSubmit }: Step3Props) {
+function Step4Location({ loading, onBack, onSubmit }: Step4Props) {
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-4">
       <div className="space-y-2">
@@ -218,86 +290,192 @@ function Step3Location({ loading, onBack, onSubmit }: Step3Props) {
           Back
         </Button>
         <Button type="submit" disabled={loading} className="flex-1">
-          {loading ? "Verifying..." : "Continue"}
+          {loading ? "Saving..." : "Continue"}
         </Button>
       </div>
     </form>
   );
 }
 
-// --- Step 4: Synagogue ---
+// --- Step 5: Synagogue ---
 
-interface Step4Props {
+interface Step5Props {
   loading: boolean;
+  regionId: number | null;
   onBack: () => void;
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
 }
 
-function Step4Synagogue({ loading, onBack, onSubmit }: Step4Props) {
+function Step5Synagogue({ loading, regionId, onBack, onSubmit }: Step5Props) {
   const [query, setQuery] = useState("");
-  const [suggestions, setSuggestions] = useState<{ id: number; name: string }[]>([]);
+  const [suggestions, setSuggestions] = useState<
+    { id: number; name: string }[]
+  >([]);
   const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [selectedName, setSelectedName] = useState<string | null>(null);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [orthodoxAffiliationConfirmed, setOrthodoxAffiliationConfirmed] =
+    useState(false);
+  const [privacyConsentConfirmed, setPrivacyConsentConfirmed] = useState(false);
+  const trimmedQuery = query.trim();
+  const hasSynagogueSelection =
+    Boolean(selectedName) || trimmedQuery.length > 0;
 
   useEffect(() => {
     if (query.length < 2) {
-      setSuggestions([]);
       setShowSuggestions(false);
+      setSuggestions([]);
+
       return;
     }
     const timeout = setTimeout(async () => {
-      const res = await fetch(`/api/synagogues/search?q=${encodeURIComponent(query)}`);
-      if (res.ok) {
-        const data = await res.json();
-        setSuggestions(data);
-        setShowSuggestions(data.length > 0);
-      }
+      const data = await searchSynagogues(query, regionId);
+      setSuggestions(data);
+      setShowSuggestions(data.length > 0);
     }, 300);
     return () => clearTimeout(timeout);
   }, [query]);
 
+  useEffect(() => {
+    if (!orthodoxAffiliationConfirmed) {
+      handleClear();
+      setPrivacyConsentConfirmed(false);
+    }
+  }, [orthodoxAffiliationConfirmed]);
+
+  useEffect(() => {
+    if (!hasSynagogueSelection) {
+      setPrivacyConsentConfirmed(false);
+    }
+  }, [hasSynagogueSelection]);
+
   function handleSelect(s: { id: number; name: string }) {
     setSelectedId(s.id);
-    setQuery(s.name);
+    setSelectedName(s.name);
+    setQuery("");
     setShowSuggestions(false);
+    setPrivacyConsentConfirmed(false);
+  }
+
+  function handleClear() {
+    setSelectedId(null);
+    setSelectedName(null);
+    setQuery("");
+    setPrivacyConsentConfirmed(false);
   }
 
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-4">
-      <div className="space-y-2">
-        <Label htmlFor="synagogue">Shul / Beis Medrash</Label>
-        <div className="relative">
-          <Input
-            id="synagogue"
-            name="synagogueName"
-            placeholder="Start typing your shul name..."
-            value={query}
-            onChange={(e) => {
-              setQuery(e.target.value);
-              if (selectedId) setSelectedId(null);
-            }}
-            onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
-            autoComplete="off"
+      <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
+        <label className="flex items-start gap-3 cursor-pointer">
+          <input
+            type="checkbox"
+            name="orthodoxAffiliation"
+            value="yes"
+            checked={orthodoxAffiliationConfirmed}
+            onChange={(event) =>
+              setOrthodoxAffiliationConfirmed(event.target.checked)
+            }
+            required
+            disabled={loading}
+            className="mt-0.5 size-4 shrink-0 accent-primary cursor-pointer"
           />
-          {showSuggestions && (
-            <ul className="absolute z-10 w-full mt-1 bg-background border rounded-md shadow-md overflow-hidden">
-              {suggestions.map((s) => (
-                <li
-                  key={s.id}
-                  onMouseDown={() => handleSelect(s)}
-                  className="px-3 py-2 text-sm cursor-pointer hover:bg-muted"
-                >
-                  {s.name}
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+          <span className="text-sm font-medium">
+            I'm affiliated with an Orthodox Jewish community
+          </span>
+        </label>
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="synagogue" className="text-sm font-medium">
+          Your shul or beis medrash
+        </Label>
+        {selectedName ? (
+          <>
+            <div className="flex items-center gap-2">
+              <div className="flex-1 flex items-center gap-2 rounded-lg border-2 border-primary bg-primary/5 px-4 py-3">
+                <span className="text-sm font-medium text-foreground">
+                  {selectedName}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={handleClear}
+                className="p-2 hover:bg-muted rounded-lg transition-colors"
+                aria-label="Clear selection"
+              >
+                <X className="size-5" />
+              </button>
+            </div>
+            <input type="hidden" name="synagogueName" value={selectedName} />
+          </>
+        ) : (
+          <div className="relative">
+            <Input
+              id="synagogue"
+              name="synagogueName"
+              placeholder="e.g. Golders Green Synagogue"
+              value={query}
+              onChange={(e) => {
+                setQuery(e.target.value);
+                setShowSuggestions(true);
+                setPrivacyConsentConfirmed(false);
+              }}
+              onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
+              autoComplete="off"
+              disabled={!orthodoxAffiliationConfirmed || loading}
+              required
+            />
+            {showSuggestions && suggestions.length > 0 && (
+              <ul className="absolute z-10 w-full mt-1 bg-background border rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                {suggestions.map((s) => (
+                  <li
+                    key={s.id}
+                    onMouseDown={() => handleSelect(s)}
+                    className="px-4 py-2.5 text-sm cursor-pointer hover:bg-primary/10 transition-colors first:rounded-t-lg last:rounded-b-lg"
+                  >
+                    {s.name}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
         <input type="hidden" name="synagogueId" value={selectedId ?? ""} />
         <p className="text-xs text-muted-foreground">
-          Optional. If your shul isn&apos;t listed, we&apos;ll add it.
+          Don't see yours? Just type it in and we'll add it.
         </p>
       </div>
+      {hasSynagogueSelection && (
+        <div className="rounded-lg border border-primary/20 bg-primary/5 p-4">
+          <label className="flex items-start gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              name="privacyConsent"
+              value="yes"
+              checked={privacyConsentConfirmed}
+              onChange={(event) =>
+                setPrivacyConsentConfirmed(event.target.checked)
+              }
+              required
+              disabled={loading}
+              className="mt-0.5 size-4 shrink-0 accent-primary cursor-pointer"
+            />
+            <span className="text-sm">
+              I agree to the{" "}
+              <Link
+                href="/privacy-policy"
+                target="_blank"
+                rel="noreferrer"
+                className="text-primary underline hover:no-underline"
+              >
+                Privacy Policy
+              </Link>{" "}
+              and consent to identity verification with my synagogue if deemed
+              necessary.
+            </span>
+          </label>
+        </div>
+      )}
       <div className="flex gap-3">
         <Button
           type="button"
@@ -308,7 +486,16 @@ function Step4Synagogue({ loading, onBack, onSubmit }: Step4Props) {
         >
           Back
         </Button>
-        <Button type="submit" disabled={loading} className="flex-1">
+        <Button
+          type="submit"
+          disabled={
+            loading ||
+            !orthodoxAffiliationConfirmed ||
+            !hasSynagogueSelection ||
+            !privacyConsentConfirmed
+          }
+          className="flex-1"
+        >
           {loading ? "Finishing..." : "Finish"}
         </Button>
       </div>
@@ -322,7 +509,9 @@ export default function OnboardingPage() {
   const { data: session } = useSession();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [regionId, setRegionId] = useState<number | null>(null);
   const [name, setName] = useState("");
+  const [bio, setBio] = useState("");
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [uploadedUrl, setUploadedUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -330,7 +519,8 @@ export default function OnboardingPage() {
   useEffect(() => {
     if (session?.user?.name) setName(session.user.name);
     if (session?.user?.image) setPreviewImage(session.user.image);
-  }, [session?.user?.name, session?.user?.image]);
+    if (session?.user?.bio) setBio(session.user.bio);
+  }, [session?.user?.name, session?.user?.image, session?.user?.bio]);
 
   const { startUpload, isUploading } = useUploadThing("profilePicture", {
     onClientUploadComplete: (res) => {
@@ -406,11 +596,12 @@ export default function OnboardingPage() {
     setLoading(true);
     const formData = new FormData(e.currentTarget);
     try {
-      const result = await saveOnboardingLocation(formData);
+      const result = await saveOnboardingBio(formData);
       if (result?.error) {
         toast.error(result.error);
-        if (result.showWaitlist) window.location.href = "/waitlist";
       } else {
+        const trimmedBio = (formData.get("bio") as string | null)?.trim() ?? "";
+        setBio(trimmedBio);
         setStep(4);
       }
     } catch {
@@ -420,12 +611,39 @@ export default function OnboardingPage() {
     }
   }
 
+  const handleBioSkip = useCallback(() => {
+    setStep(4);
+  }, []);
+
   async function handleStep4(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setLoading(true);
     const formData = new FormData(e.currentTarget);
     try {
-      await completeOnboarding(formData);
+      const result = await saveOnboardingLocation(formData);
+      if (result?.error) {
+        toast.error(result.error);
+        if (result.showWaitlist) window.location.href = "/waitlist";
+      } else {
+        setRegionId(result.regionId ?? null);
+        setStep(5);
+      }
+    } catch {
+      toast.error("Something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleStep5(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setLoading(true);
+    const formData = new FormData(e.currentTarget);
+    try {
+      const result = await completeOnboarding(formData);
+      if (result?.error) {
+        toast.error(result.error);
+      }
     } catch {
       // redirect throws, which is expected on success
     } finally {
@@ -436,10 +654,10 @@ export default function OnboardingPage() {
   const { title, description } = STEPS[step - 1];
 
   return (
-    <Card className="w-full">
+    <Card className="w-full overflow-visible">
       <CardHeader className="text-center">
         <div className="mb-2 flex justify-center">
-          <BookOpen className="h-8 w-8 text-primary" />
+          <LogoMark size={48} />
         </div>
         <CardTitle className="text-2xl">{title}</CardTitle>
         <CardDescription>{description}</CardDescription>
@@ -478,17 +696,28 @@ export default function OnboardingPage() {
           />
         )}
         {step === 3 && (
-          <Step3Location
+          <Step3Bio
+            bio={bio}
             loading={loading}
             onBack={() => setStep(2)}
+            onSkip={handleBioSkip}
+            onBioChange={setBio}
             onSubmit={handleStep3}
           />
         )}
         {step === 4 && (
-          <Step4Synagogue
+          <Step4Location
             loading={loading}
             onBack={() => setStep(3)}
             onSubmit={handleStep4}
+          />
+        )}
+        {step === 5 && (
+          <Step5Synagogue
+            loading={loading}
+            regionId={regionId}
+            onBack={() => setStep(4)}
+            onSubmit={handleStep5}
           />
         )}
       </CardContent>

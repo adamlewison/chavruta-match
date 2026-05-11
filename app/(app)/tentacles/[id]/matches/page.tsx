@@ -1,8 +1,7 @@
 import { redirect, notFound } from "next/navigation";
 import { getCurrentUser, getTentacle, getMatches } from "@/lib/queries";
 import { SUBJECT_LABELS } from "@/lib/db/schema";
-import { MatchCard } from "@/components/match-card";
-import { Search } from "lucide-react";
+import { MatchesResults } from "@/components/matches-results";
 
 export default async function MatchesPage({
   params,
@@ -75,34 +74,18 @@ export default async function MatchesPage({
           Matches for{" "}
           {SUBJECT_LABELS[tentacle.subject as keyof typeof SUBJECT_LABELS]}
         </h1>
-        <p className="text-muted-foreground">
-          {matches.length} potential study partners found
-        </p>
       </div>
 
-      {matches.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 text-center">
-          <Search className="h-10 w-10 text-muted-foreground mb-3" />
-          <p className="text-muted-foreground">
-            No matches yet. As more people join, matches will appear here.
-          </p>
-        </div>
-      ) : (
-        <div className="grid gap-4 sm:grid-cols-2">
-          {matches.map((match) => (
-            <MatchCard
-              key={match.id}
-              match={match}
-              currentUserId={user.id}
-              myTentacleId={tentacle.id}
-              myAvailability={tentacle.availabilityLocal}
-              subjectLabel={
-                SUBJECT_LABELS[tentacle.subject as keyof typeof SUBJECT_LABELS]
-              }
-            />
-          ))}
-        </div>
-      )}
+      <MatchesResults
+        matches={matches}
+        currentUserId={user.id}
+        myTentacleId={tentacle.id}
+        myAvailability={tentacle.availabilityLocal}
+        subjectLabel={
+          SUBJECT_LABELS[tentacle.subject as keyof typeof SUBJECT_LABELS]
+        }
+        error={matchError}
+      />
     </div>
   );
 }

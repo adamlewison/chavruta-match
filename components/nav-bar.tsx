@@ -31,7 +31,7 @@ import { useTheme } from "@/components/theme-provider";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: Home },
-  { href: "/tentacles/new", label: "New Tentacle", icon: BookOpen },
+  { href: "/tentacles/new", label: "Add a Learning Request", icon: BookOpen },
   { href: "/connections", label: "Connections", icon: Link2 },
   { href: "/messages", label: "Messages", icon: MessageSquare },
 ];

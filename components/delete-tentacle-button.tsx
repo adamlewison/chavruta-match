@@ -10,7 +10,7 @@ export function DeleteTentacleButton({ tentacleId }: { tentacleId: string }) {
   const [loading, setLoading] = useState(false);
 
   async function handleDelete() {
-    if (!confirm("Are you sure you want to delete this tentacle?")) return;
+    if (!confirm("Are you sure you want to delete this study slot?")) return;
     setLoading(true);
     try {
       await deleteTentacle(tentacleId);

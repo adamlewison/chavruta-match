@@ -95,9 +95,22 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return token;
     },
     async session({ session, token }) {
-      if (session.user) {
-        session.user.id = token.id as string;
+      if (!session.user) {
+        return session;
       }
+
+      const userId = token.id as string | undefined;
+      if (userId) {
+        session.user.id = userId;
+        const dbUser = await db.query.users.findFirst({
+          where: eq(users.id, userId),
+        });
+
+        if (dbUser) {
+          session.user.bio = dbUser.bio ?? undefined;
+        }
+      }
+
       return session;
     },
   },

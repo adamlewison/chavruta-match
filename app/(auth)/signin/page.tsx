@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { signIn } from "next-auth/react";
-import { BookOpen, Mail, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { signIn, useSession } from "next-auth/react";
+import { Mail, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { LogoMark } from "@/components/logo";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -15,11 +17,17 @@ import {
 } from "@/components/ui/card";
 
 export default function SignInPage() {
+  const router = useRouter();
+  const { status } = useSession();
   const [email, setEmail] = useState("");
-  const [code, setCode] = useState("");
-  const [showCodeInput, setShowCodeInput] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+
+  // If already signed in, redirect to dashboard
+  if (status === "authenticated") {
+    router.replace("/dashboard");
+    return null;
+  }
 
   const handleSendCode = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,35 +47,9 @@ export default function SignInPage() {
         throw new Error(data.error || "Failed to send code");
       }
 
-      setShowCodeInput(true);
+      router.push(`/signin/code?email=${encodeURIComponent(email)}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to send code");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleVerifyCode = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-    setIsLoading(true);
-
-    try {
-      const result = await signIn("passcode", {
-        email,
-        code,
-        redirect: false,
-      });
-
-      if (result?.error) {
-        throw new Error("Invalid or expired code");
-      }
-
-      if (result?.ok) {
-        window.location.href = "/dashboard";
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to verify code");
     } finally {
       setIsLoading(false);
     }
@@ -77,16 +59,17 @@ export default function SignInPage() {
     <Card className="w-full">
       <CardHeader className="text-center">
         <div className="flex justify-center mb-2">
-          <BookOpen className="h-8 w-8 text-primary" />
+          <LogoMark size={48} />
         </div>
-        <CardTitle className="text-2xl">Welcome to ChavrutaMatch</CardTitle>
+        <CardTitle className="text-2xl">Welcome to Vruta</CardTitle>
         <CardDescription>Sign in to find your study partner</CardDescription>
       </CardHeader>
-      <CardContent className="flex flex-col gap-3">
+      <CardContent className="flex flex-col gap-4">
         <Button
           variant="outline"
           className="w-full gap-2"
           onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
+          disabled={isLoading}
         >
           <svg className="h-4 w-4" viewBox="0 0 24 24">
             <path
@@ -108,7 +91,8 @@ export default function SignInPage() {
           </svg>
           Continue with Google
         </Button>
-        <div className="relative my-2">
+
+        <div className="relative my-1">
           <div className="absolute inset-0 flex items-center">
             <span className="w-full border-t" />
           </div>
@@ -117,72 +101,28 @@ export default function SignInPage() {
           </div>
         </div>
 
-        {!showCodeInput ? (
-          <form onSubmit={handleSendCode} className="flex flex-col gap-3">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                disabled={isLoading}
-              />
-            </div>
-            <Button type="submit" className="w-full gap-2" disabled={isLoading}>
-              {isLoading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Mail className="h-4 w-4" />
-              )}
-              Continue with Email
-            </Button>
-          </form>
-        ) : (
-          <form onSubmit={handleVerifyCode} className="flex flex-col gap-3">
-            <div className="space-y-2">
-              <Label htmlFor="code">Enter 6-digit code</Label>
-              <Input
-                id="code"
-                type="text"
-                placeholder="123456"
-                value={code}
-                onChange={(e) =>
-                  setCode(e.target.value.replace(/\D/g, "").slice(0, 6))
-                }
-                maxLength={6}
-                required
-                disabled={isLoading}
-                className="text-center text-2xl tracking-widest"
-              />
-              <p className="text-xs text-muted-foreground text-center">
-                Code sent to {email}
-              </p>
-            </div>
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                "Verify Code"
-              )}
-            </Button>
-            <Button
-              type="button"
-              variant="ghost"
-              className="w-full"
-              onClick={() => {
-                setShowCodeInput(false);
-                setCode("");
-                setError("");
-              }}
+        <form onSubmit={handleSendCode} className="flex flex-col gap-3">
+          <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="you@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
               disabled={isLoading}
-            >
-              Back to email
-            </Button>
-          </form>
-        )}
+            />
+          </div>
+          <Button type="submit" className="w-full gap-2" disabled={isLoading}>
+            {isLoading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Mail className="h-4 w-4" />
+            )}
+            Continue with email
+          </Button>
+        </form>
 
         {error && (
           <p className="text-sm text-destructive text-center">{error}</p>

@@ -25,7 +25,9 @@ export default function WaitlistPage() {
     setLoading(true);
     try {
       await joinWaitlist({ email, requestedRegion: region });
-      toast.success("You're on the list! We'll let you know when we launch in your area.");
+      toast.success(
+        "You're on the list! We'll let you know when we launch in your area.",
+      );
       setEmail("");
       setRegion("");
     } catch {
@@ -41,10 +43,12 @@ export default function WaitlistPage() {
         <div className="flex justify-center mb-2">
           <MapPin className="h-8 w-8 text-primary" />
         </div>
-        <CardTitle className="text-2xl">Not available in your area yet</CardTitle>
+        <CardTitle className="text-2xl">
+          Not available in your area yet
+        </CardTitle>
         <CardDescription>
-          ChavrutaMatch is currently available in London only. Join the waitlist
-          and we&apos;ll notify you when we expand to your region.
+          Vruta is currently available in London only. Join the waitlist and
+          we&apos;ll notify you when we expand to your region.
         </CardDescription>
       </CardHeader>
       <CardContent>

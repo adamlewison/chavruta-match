@@ -48,6 +48,8 @@ interface MatchCardProps {
   subjectLabel: string;
 }
 
+export type MatchCardMatch = MatchCardProps["match"];
+
 export function MatchCard({
   match,
   currentUserId,

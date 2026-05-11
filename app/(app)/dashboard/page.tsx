@@ -38,17 +38,20 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">Welcome back, {user.name}</h1>
+          <p className="text-sm text-muted-foreground mb-1">
+            Welcome back, {user.name}
+          </p>
+          <h1 className="text-2xl font-bold">My Learning</h1>
           <p className="text-muted-foreground">
-            Manage your learning tentacles and connections.
+            Keep your study slots, matches, and connections in one place.
           </p>
         </div>
         <Link href="/tentacles/new">
           <Button className="gap-2">
             <Plus className="h-4 w-4" />
-            New Tentacle
+            Add a Learning Request
           </Button>
         </Link>
       </div>
@@ -97,18 +100,19 @@ export default async function DashboardPage() {
 
       {/* Your tentacles */}
       <section>
-        <h2 className="text-lg font-semibold mb-3">Your Tentacles</h2>
+        <h2 className="text-lg font-semibold mb-3">Your Study Slots</h2>
         {tentaclesList.length === 0 ? (
           <Card>
             <CardContent className="flex flex-col items-center justify-center py-10">
               <BookOpen className="h-10 w-10 text-muted-foreground mb-3" />
-              <p className="text-muted-foreground mb-4">
-                No tentacles yet. Create one to start matching.
+              <p className="text-muted-foreground mb-4 text-center max-w-sm">
+                To find a chavruta, tell us what you’re interested in learning
+                and when you’re free.
               </p>
               <Link href="/tentacles/new">
                 <Button className="gap-2">
                   <Plus className="h-4 w-4" />
-                  Create your first tentacle
+                  Add a Learning Request
                 </Button>
               </Link>
             </CardContent>
@@ -116,40 +120,58 @@ export default async function DashboardPage() {
         ) : (
           <div className="grid gap-4 sm:grid-cols-2">
             {tentaclesList.map((t) => (
-              <Link key={t.id} href={`/tentacles/${t.id}`}>
-                <Card className="hover:border-primary/30 transition-colors h-full">
-                  <CardContent className="pt-4">
-                    <div className="flex items-start justify-between mb-2">
-                      <Badge variant={t.active ? "default" : "secondary"}>
-                        {
-                          SUBJECT_LABELS[
-                            t.subject as keyof typeof SUBJECT_LABELS
-                          ]
-                        }
+              <Card
+                key={t.id}
+                className="hover:border-primary/30 transition-colors h-full"
+              >
+                <CardContent className="pt-4">
+                  <div className="flex items-start justify-between mb-2">
+                    <Badge variant={t.active ? "default" : "secondary"}>
+                      {SUBJECT_LABELS[t.subject as keyof typeof SUBJECT_LABELS]}
+                    </Badge>
+                    {!t.active && (
+                      <Badge variant="outline" className="text-xs">
+                        Paused
                       </Badge>
-                      {!t.active && (
-                        <Badge variant="outline" className="text-xs">
-                          Paused
-                        </Badge>
-                      )}
-                    </div>
-                    {t.medium && (
-                      <p className="text-xs text-muted-foreground mb-2">
-                        {MEDIUM_LABELS[t.medium as keyof typeof MEDIUM_LABELS]}
-                      </p>
                     )}
-                    <AvailabilityMini bitmap={t.availabilityLocal} />
-                    {t.notes && (
-                      <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
-                        {t.notes}
-                      </p>
-                    )}
-                    <div className="flex items-center gap-1 mt-3 text-xs text-primary font-medium">
-                      View matches <ArrowRight className="h-3 w-3" />
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
+                  </div>
+                  {t.medium && (
+                    <p className="text-xs text-muted-foreground mb-2">
+                      {MEDIUM_LABELS[t.medium as keyof typeof MEDIUM_LABELS]}
+                    </p>
+                  )}
+                  <AvailabilityMini bitmap={t.availabilityLocal} />
+                  {t.notes && (
+                    <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
+                      {t.notes}
+                    </p>
+                  )}
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <Link
+                      href={`/tentacles/${t.id}/matches`}
+                      className="flex-1 min-w-[120px]"
+                    >
+                      <Button
+                        variant="outline"
+                        className="w-full justify-center gap-1"
+                      >
+                        Find matches
+                      </Button>
+                    </Link>
+                    <Link
+                      href={`/tentacles/${t.id}`}
+                      className="flex-1 min-w-[120px]"
+                    >
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-center gap-1"
+                      >
+                        Edit slot
+                      </Button>
+                    </Link>
+                  </div>
+                </CardContent>
+              </Card>
             ))}
           </div>
         )}
@@ -169,8 +191,8 @@ export default async function DashboardPage() {
           <Card>
             <CardContent className="flex flex-col items-center justify-center py-10">
               <Users className="h-10 w-10 text-muted-foreground mb-3" />
-              <p className="text-muted-foreground">
-                No connections yet. Create a tentacle and start matching!
+              <p className="text-muted-foreground text-center">
+                No connections yet. Create a study slot and start matching!
               </p>
             </CardContent>
           </Card>

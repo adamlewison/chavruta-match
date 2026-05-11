@@ -11,16 +11,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { AvailabilityPicker } from "@/components/availability-picker";
 import { updateTentacle } from "@/app/actions/tentacles";
-import { SUBJECT_LABELS, MEDIUM_LABELS, SUBJECTS, MEDIUMS } from "@/lib/db/schema";
+import {
+  SUBJECT_LABELS,
+  MEDIUM_LABELS,
+  SUBJECTS,
+  MEDIUMS,
+} from "@/lib/db/schema";
 import type { Tentacle } from "@/lib/db/schema";
 
 export function TentacleEditForm({ tentacle }: { tentacle: Tentacle }) {
@@ -43,7 +43,7 @@ export function TentacleEditForm({ tentacle }: { tentacle: Tentacle }) {
       if (result?.error) {
         toast.error(result.error);
       } else {
-        toast.success("Tentacle updated!");
+        toast.success("Study slot updated!");
       }
     } catch {
       toast.error("Failed to update");
@@ -55,12 +55,15 @@ export function TentacleEditForm({ tentacle }: { tentacle: Tentacle }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-lg">Edit Tentacle</CardTitle>
+        <CardTitle className="text-lg">Edit Study Slot</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="space-y-2">
           <Label>Subject</Label>
-          <Select value={subject} onValueChange={(v) => v && setSubject(v as typeof subject)}>
+          <Select
+            value={subject}
+            onValueChange={(v) => v && setSubject(v as typeof subject)}
+          >
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>

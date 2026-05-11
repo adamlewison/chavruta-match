@@ -72,6 +72,7 @@ export const synagogues = pgTable(
   {
     id: serial("id").primaryKey(),
     name: text("name").notNull(),
+    nickname: text("nickname"),
     description: text("description"),
     regionId: integer("region_id").references(() => regions.id),
     country: text("country"),

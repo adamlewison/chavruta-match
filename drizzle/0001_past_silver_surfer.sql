@@ -1,0 +1,1 @@
+ALTER TABLE "synagogues" ADD COLUMN "nickname" text;

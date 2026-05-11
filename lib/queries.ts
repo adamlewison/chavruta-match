@@ -28,6 +28,13 @@ export async function getTentacle(tentacleId: string, userId: string) {
   });
 }
 
+export async function getRegionById(regionId: number | null | undefined) {
+  if (!regionId) return null;
+  return db.query.regions.findFirst({
+    where: eq(regions.id, regionId),
+  });
+}
+
 export async function getIncomingConnections(userId: string) {
   const rows = await db
     .select({

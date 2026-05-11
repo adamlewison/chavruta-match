@@ -75,7 +75,7 @@ export default async function ConnectionDetailPage({
             </Card>
           )}
 
-          {/* Tentacle details */}
+          {/* Study slot details */}
           {(myTentacle || theirTentacle) && (
             <Card>
               <CardHeader className="pb-2">
@@ -92,11 +92,19 @@ export default async function ConnectionDetailPage({
                     </p>
                     <div className="flex items-center gap-2">
                       <Badge>
-                        {SUBJECT_LABELS[theirTentacle.subject as keyof typeof SUBJECT_LABELS]}
+                        {
+                          SUBJECT_LABELS[
+                            theirTentacle.subject as keyof typeof SUBJECT_LABELS
+                          ]
+                        }
                       </Badge>
                       {theirTentacle.medium && (
                         <Badge variant="outline">
-                          {MEDIUM_LABELS[theirTentacle.medium as keyof typeof MEDIUM_LABELS]}
+                          {
+                            MEDIUM_LABELS[
+                              theirTentacle.medium as keyof typeof MEDIUM_LABELS
+                            ]
+                          }
                         </Badge>
                       )}
                     </div>
@@ -112,11 +120,18 @@ export default async function ConnectionDetailPage({
                   <>
                     <Separator />
                     {(() => {
-                      const score = availabilityScore(myTentacle.availabilityUtc, theirTentacle.availabilityUtc);
+                      const score = availabilityScore(
+                        myTentacle.availabilityUtc,
+                        theirTentacle.availabilityUtc,
+                      );
                       const label =
-                        score >= 80 ? "Amazing fit" :
-                        score >= 60 ? "Great fit" :
-                        score >= 40 ? "Good fit" : "Possible fit";
+                        score >= 80
+                          ? "Amazing fit"
+                          : score >= 60
+                            ? "Great fit"
+                            : score >= 40
+                              ? "Good fit"
+                              : "Possible fit";
                       return (
                         <div>
                           <div className="flex items-center justify-between mb-1.5">
@@ -124,7 +139,9 @@ export default async function ConnectionDetailPage({
                               <Sparkles className="h-4 w-4 text-primary" />
                               {label}
                             </div>
-                            <span className="text-xs text-muted-foreground">Availability compatibility</span>
+                            <span className="text-xs text-muted-foreground">
+                              Availability compatibility
+                            </span>
                           </div>
                           <div className="h-3 overflow-hidden rounded-full bg-muted">
                             <div
@@ -141,15 +158,23 @@ export default async function ConnectionDetailPage({
                 {myTentacle && (
                   <div>
                     <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
-                      Your tentacle
+                      Your study slot
                     </p>
                     <div className="flex items-center gap-2">
                       <Badge variant="secondary">
-                        {SUBJECT_LABELS[myTentacle.subject as keyof typeof SUBJECT_LABELS]}
+                        {
+                          SUBJECT_LABELS[
+                            myTentacle.subject as keyof typeof SUBJECT_LABELS
+                          ]
+                        }
                       </Badge>
                       {myTentacle.medium && (
                         <Badge variant="outline">
-                          {MEDIUM_LABELS[myTentacle.medium as keyof typeof MEDIUM_LABELS]}
+                          {
+                            MEDIUM_LABELS[
+                              myTentacle.medium as keyof typeof MEDIUM_LABELS
+                            ]
+                          }
                         </Badge>
                       )}
                     </div>
@@ -167,20 +192,14 @@ export default async function ConnectionDetailPage({
           {/* Accept / decline (only for recipient) */}
           {isRecipient && (
             <div className="flex gap-3">
-              <ConnectionActions
-                connectionId={connection.id}
-                type="incoming"
-              />
+              <ConnectionActions connectionId={connection.id} type="incoming" />
             </div>
           )}
 
           {/* Cancel (only for initiator) */}
           {!isRecipient && (
             <div className="flex gap-3">
-              <ConnectionActions
-                connectionId={connection.id}
-                type="outgoing"
-              />
+              <ConnectionActions connectionId={connection.id} type="outgoing" />
             </div>
           )}
         </>

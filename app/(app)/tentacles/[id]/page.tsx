@@ -59,7 +59,7 @@ export default async function TentaclePage({
       <Card className="border-destructive/30">
         <CardContent className="flex items-center justify-between py-4">
           <div>
-            <p className="font-medium text-sm">Delete this tentacle</p>
+            <p className="font-medium text-sm">Delete this study slot</p>
             <p className="text-xs text-muted-foreground">
               This action cannot be undone.
             </p>

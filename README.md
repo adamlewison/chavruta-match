@@ -1,10 +1,12 @@
-# Chavruta Match
+# Vruta
+
+Find your chavruta. Grow together.
 
 A web platform for connecting Jewish study partners (chavrutim) to learn and discuss Jewish texts together.
 
 ## About
 
-Chavruta Match helps people find study partners to engage in chavruta, the traditional Talmudic paired learning method. Users can create profiles, specify what they want to study, set their availability and preferred learning medium, and connect with other learners in their region.
+Vruta helps people find study partners to engage in chavruta, the traditional Talmudic paired learning method. Users can create profiles, specify what they want to study, set their availability and preferred learning medium, and connect with other learners in their region.
 
 ## Features
 
@@ -50,23 +52,28 @@ Chavruta Match helps people find study partners to engage in chavruta, the tradi
 ### Installation
 
 1. Clone the repository:
+
 ```bash
 git clone <repository-url>
 cd chavruta-match
 ```
 
 2. Install dependencies:
+
 ```bash
 npm install
 ```
 
 3. Set up environment variables:
+
 ```bash
 cp .env.example .env.local
 ```
+
 Fill in required environment variables including database URL, auth secrets, and API keys.
 
 4. Set up the database:
+
 ```bash
 npm run db:generate
 npm run db:push
@@ -74,6 +81,7 @@ npm run db:seed
 ```
 
 5. Start the development server:
+
 ```bash
 npm run dev
 ```
