@@ -50,7 +50,7 @@ export default function ComingSoonPage() {
               Match with someone who makes Torah come alive — in a few taps.
             </p>
             <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
-              <Link href="/waitlist">
+              <Link href="/coming-soon/waitlist">
                 <Button className="gap-2" size="lg">
                   Join the waitlist
                   <ArrowRight className="h-4 w-4" />
