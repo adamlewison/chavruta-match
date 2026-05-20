@@ -39,7 +39,7 @@ export default function HomePage() {
         <section className="relative isolate overflow-hidden rounded-b-[40px] bg-gradient-to-br from-[#eef2ff] via-white to-[#dff7ff] px-6 py-16 sm:px-10">
           <div className="relative mx-auto flex max-w-4xl flex-col gap-10 text-center">
             <p className="text-sm uppercase tracking-[0.3em] text-cyan-700">
-              New look
+              Rabbinically endorsed
             </p>
             <h1 className="text-4xl font-black leading-tight text-[#0b1736] sm:text-5xl lg:text-6xl">
               Find your{" "}
@@ -70,7 +70,7 @@ export default function HomePage() {
             </div>
             <div className="flex justify-center gap-6 text-xs uppercase tracking-[0.3em] text-slate-500">
               <span>London</span>
-              <span>Coming soon: NYC · TLV</span>
+              <span>More cities coming soon</span>
             </div>
           </div>
         </section>
