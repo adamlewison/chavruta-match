@@ -16,12 +16,14 @@
     "db:reset": "npx tsx --env-file .env.local drizzle/reset.ts"
   },
   "dependencies": {
+    "@ai-sdk/openai": "^3.0.64",
     "@auth/drizzle-adapter": "^1.11.2",
     "@base-ui/react": "^1.4.1",
     "@hookform/resolvers": "^5.2.2",
     "@maxmind/geoip2-node": "^6.3.4",
     "@uploadthing/react": "^7.3.3",
     "@vercel/analytics": "^2.0.1",
+    "ai": "^6.0.185",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "drizzle-orm": "^0.45.2",
