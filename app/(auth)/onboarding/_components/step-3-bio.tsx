@@ -34,7 +34,7 @@ export function Step3Bio({
           className="min-h-24"
         />
         <p className="text-xs text-muted-foreground">
-          Optional — helps others see if you're a good match
+          Optional — helps others see if you&apos;re a good match
         </p>
       </div>
       <div className="flex gap-3">

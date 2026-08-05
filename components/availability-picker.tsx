@@ -1,13 +1,12 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
   SLOTS_PER_DAY,
   DAYS_PER_WEEK,
   DAY_NAMES,
-  TOTAL_SLOTS,
   slotIndex,
   getBit,
   totalHours,
@@ -32,35 +31,19 @@ export function AvailabilityPicker({
 }: AvailabilityPickerProps) {
   const [isPainting, setIsPainting] = useState(false);
   const [paintValue, setPaintValue] = useState(true);
-  const bitmapRef = useRef(value);
-  bitmapRef.current = value;
 
-  const toggleSlot = useCallback(
-    (day: number, slot: number) => {
-      if (readOnly) return;
-      const idx = slotIndex(day, slot);
-      const arr = bitmapRef.current.split("");
-      arr[idx] = arr[idx] === "1" ? "0" : "1";
-      onChange(arr.join(""));
-    },
-    [readOnly, onChange]
-  );
-
-  const setSlot = useCallback(
-    (day: number, slot: number, val: boolean) => {
-      if (readOnly) return;
-      const idx = slotIndex(day, slot);
-      const arr = bitmapRef.current.split("");
-      arr[idx] = val ? "1" : "0";
-      onChange(arr.join(""));
-    },
-    [readOnly, onChange]
-  );
+  const setSlot = (day: number, slot: number, val: boolean) => {
+    if (readOnly) return;
+    const idx = slotIndex(day, slot);
+    const arr = value.split("");
+    arr[idx] = val ? "1" : "0";
+    onChange(arr.join(""));
+  };
 
   const handlePointerDown = (day: number, slot: number) => {
     if (readOnly) return;
     const idx = slotIndex(day, slot);
-    const newVal = bitmapRef.current[idx] !== "1";
+    const newVal = value[idx] !== "1";
     setPaintValue(newVal);
     setIsPainting(true);
     setSlot(day, slot, newVal);

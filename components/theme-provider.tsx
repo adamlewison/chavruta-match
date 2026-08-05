@@ -22,7 +22,11 @@ export function ThemeProvider({
   const [theme, setTheme] = useState<Theme>(defaultTheme);
 
   useEffect(() => {
+    // localStorage isn't available during SSR; reading it in a lazy useState
+    // initializer would mismatch the server-rendered HTML on hydration, so
+    // this has to run post-mount.
     const stored = localStorage.getItem("theme") as Theme | null;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (stored) setTheme(stored);
   }, []);
 

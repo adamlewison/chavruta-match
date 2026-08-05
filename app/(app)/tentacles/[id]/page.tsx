@@ -1,15 +1,8 @@
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowRight, Trash2 } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { getCurrentUser, getTentacle } from "@/lib/queries";
 import { SUBJECT_LABELS, MEDIUM_LABELS } from "@/lib/db/schema";
 import { totalHours } from "@/lib/availability";

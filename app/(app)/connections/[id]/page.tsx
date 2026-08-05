@@ -212,13 +212,7 @@ export default async function ConnectionDetailPage({
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <ChatPanel
-              currentUserId={user.id}
-              currentUserName={user.name}
-              currentUserEmail={user.email}
-              currentUserImage={user.imageUrl || user.image || undefined}
-              connectionId={connection.id}
-            />
+            <ChatPanel currentUserId={user.id} connectionId={connection.id} />
           </CardContent>
         </Card>
       ) : (

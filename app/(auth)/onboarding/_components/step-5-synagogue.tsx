@@ -36,32 +36,26 @@ export function Step5Synagogue({
     Boolean(selectedName) || trimmedQuery.length > 0;
 
   useEffect(() => {
-    if (query.length < 2) {
-      setShowSuggestions(false);
-      setSuggestions([]);
-
-      return;
-    }
     const timeout = setTimeout(async () => {
+      if (query.length < 2) {
+        setShowSuggestions(false);
+        setSuggestions([]);
+        return;
+      }
       const data = await searchSynagogues(query, regionId);
       setSuggestions(data);
       setShowSuggestions(data.length > 0);
     }, 300);
     return () => clearTimeout(timeout);
-  }, [query]);
+  }, [query, regionId]);
 
-  useEffect(() => {
-    if (!orthodoxAffiliationConfirmed) {
+  function handleOrthodoxAffiliationChange(checked: boolean) {
+    setOrthodoxAffiliationConfirmed(checked);
+    if (!checked) {
       handleClear();
       setPrivacyConsentConfirmed(false);
     }
-  }, [orthodoxAffiliationConfirmed]);
-
-  useEffect(() => {
-    if (!hasSynagogueSelection) {
-      setPrivacyConsentConfirmed(false);
-    }
-  }, [hasSynagogueSelection]);
+  }
 
   function handleSelect(s: { id: number; name: string }) {
     setSelectedId(s.id);
@@ -88,14 +82,14 @@ export function Step5Synagogue({
             value="yes"
             checked={orthodoxAffiliationConfirmed}
             onChange={(event) =>
-              setOrthodoxAffiliationConfirmed(event.target.checked)
+              handleOrthodoxAffiliationChange(event.target.checked)
             }
             required
             disabled={loading}
             className="mt-0.5 size-4 shrink-0 accent-primary cursor-pointer"
           />
           <span className="text-sm font-medium">
-            I'm affiliated with an Orthodox Jewish community
+            I&apos;m affiliated with an Orthodox Jewish community
           </span>
         </label>
       </div>
@@ -156,7 +150,7 @@ export function Step5Synagogue({
         )}
         <input type="hidden" name="synagogueId" value={selectedId ?? ""} />
         <p className="text-xs text-muted-foreground">
-          Don't see yours? Just type it in and we'll add it.
+          Don&apos;t see yours? Just type it in and we&apos;ll add it.
         </p>
       </div>
       {hasSynagogueSelection && (

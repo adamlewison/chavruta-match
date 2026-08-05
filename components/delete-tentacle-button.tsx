@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
 import { deleteTentacle } from "@/app/actions/tentacles";
 
 export function DeleteTentacleButton({ tentacleId }: { tentacleId: string }) {

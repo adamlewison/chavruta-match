@@ -8,7 +8,6 @@ import {
   integer,
   pgEnum,
   index,
-  uniqueIndex,
   primaryKey,
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";

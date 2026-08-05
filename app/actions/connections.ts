@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { connections, users } from "@/lib/db/schema";
+import { connections } from "@/lib/db/schema";
 import { auth } from "@/lib/auth";
 import { eq, and, or, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";

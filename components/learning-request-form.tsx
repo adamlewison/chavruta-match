@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -157,7 +156,7 @@ export function LearningRequestForm({
             <div>
               <h2 className="text-lg font-semibold">When are you available?</h2>
               <p className="text-sm text-muted-foreground">
-                Select the days and time slot when you're free to study.
+                Select the days and time slot when you&apos;re free to study.
               </p>
             </div>
             <SimpleAvailabilityPicker onChange={setAvailability} />

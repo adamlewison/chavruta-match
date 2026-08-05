@@ -1,7 +1,9 @@
 "use client";
 
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback } from "react";
 import { useSession } from "next-auth/react";
+import type { Session } from "next-auth";
+import { Loader2 } from "lucide-react";
 import { LogoMark } from "@/components/logo";
 import {
   Card,
@@ -54,21 +56,35 @@ const STEPS = [
 ];
 
 export default function OnboardingPage() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
+
+  // Wait for the session to resolve before mounting the wizard, so its form
+  // state can be initialized from session data on first render instead of
+  // backfilling it in an Effect once the session arrives.
+  if (status === "loading") {
+    return (
+      <Card className="w-full overflow-visible">
+        <CardContent className="flex justify-center py-16">
+          <Loader2 className="size-6 animate-spin text-muted-foreground" />
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return <OnboardingWizard session={session} />;
+}
+
+function OnboardingWizard({ session }: { session: Session | null }) {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [regionId, setRegionId] = useState<number | null>(null);
-  const [name, setName] = useState("");
-  const [bio, setBio] = useState("");
-  const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [name, setName] = useState(session?.user?.name ?? "");
+  const [bio, setBio] = useState(session?.user?.bio ?? "");
+  const [previewImage, setPreviewImage] = useState<string | null>(
+    session?.user?.image ?? null,
+  );
   const [uploadedUrl, setUploadedUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (session?.user?.name) setName(session.user.name);
-    if (session?.user?.image) setPreviewImage(session.user.image);
-    if (session?.user?.bio) setBio(session.user.bio);
-  }, [session?.user?.name, session?.user?.image, session?.user?.bio]);
 
   const { startUpload, isUploading } = useUploadThing("profilePicture", {
     onClientUploadComplete: (res) => {

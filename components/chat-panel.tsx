@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Send, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,19 +17,10 @@ interface Message {
 
 interface ChatPanelProps {
   currentUserId: string;
-  currentUserName: string;
-  currentUserEmail: string;
-  currentUserImage?: string;
   connectionId: string;
 }
 
-export function ChatPanel({
-  currentUserId,
-  currentUserName,
-  currentUserEmail,
-  currentUserImage,
-  connectionId,
-}: ChatPanelProps) {
+export function ChatPanel({ currentUserId, connectionId }: ChatPanelProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [isLoading, setIsLoading] = useState(true);
@@ -47,7 +38,7 @@ export function ChatPanel({
   }, [messages]);
 
   // Load initial messages
-  const loadMessages = async () => {
+  const loadMessages = useCallback(async () => {
     try {
       const response = await fetch(`/api/messages/${connectionId}`);
       if (response.ok) {
@@ -59,10 +50,10 @@ export function ChatPanel({
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [connectionId]);
 
   // Poll for updates using ETag
-  const pollForUpdates = async () => {
+  const pollForUpdates = useCallback(async () => {
     try {
       const headers: HeadersInit = {};
       if (lastETagRef.current) {
@@ -91,7 +82,7 @@ export function ChatPanel({
     } catch (error) {
       console.error("Polling error:", error);
     }
-  };
+  }, [loadMessages]);
 
   // Send message
   const sendMessage = async (e: React.FormEvent) => {
@@ -125,7 +116,9 @@ export function ChatPanel({
 
   // Set up polling and initial load
   useEffect(() => {
-    loadMessages();
+    (async () => {
+      await loadMessages();
+    })();
 
     // Start polling every 5 seconds
     const pollInterval = setInterval(pollForUpdates, 5000);
@@ -133,7 +126,7 @@ export function ChatPanel({
     return () => {
       clearInterval(pollInterval);
     };
-  }, [connectionId]);
+  }, [connectionId, loadMessages, pollForUpdates]);
 
   if (isLoading) {
     return (
