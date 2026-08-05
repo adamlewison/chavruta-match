@@ -1,0 +1,24 @@
+name: Architecture review (agent)
+
+on:
+  schedule:
+    # Mondays 09:00 UTC
+    - cron: "0 9 * * 1"
+  workflow_dispatch: {}
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            Run the architecture-review skill (.claude/skills/architecture-review/SKILL.md).
+            Open a PR for any unambiguous, small fix it finds (rename, move, stale baseline
+            entry). For anything requiring judgment, report it instead of changing it —
+            don't open a PR for those.

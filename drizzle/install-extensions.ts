@@ -1,6 +1,4 @@
-import postgres from "postgres";
-
-const client = postgres(process.env.DATABASE_URL!);
+import { client } from "@/lib/db";
 
 async function main() {
   console.log("Installing PostgreSQL extensions...");

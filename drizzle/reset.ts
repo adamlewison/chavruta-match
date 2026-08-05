@@ -1,9 +1,5 @@
-import { drizzle } from "drizzle-orm/postgres-js";
-import postgres from "postgres";
 import { sql } from "drizzle-orm";
-
-const client = postgres(process.env.DATABASE_URL!);
-const db = drizzle(client);
+import { db, client } from "@/lib/db";
 
 async function resetDatabase() {
   console.log("🗑️  Resetting database...");

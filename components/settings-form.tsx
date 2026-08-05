@@ -139,7 +139,6 @@ function ProfilePictureModal({
   );
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploadedUrl, setUploadedUrl] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
@@ -177,7 +176,6 @@ function ProfilePictureModal({
         return;
       }
 
-      setSelectedFile(resized);
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreviewImage(reader.result as string);
@@ -219,7 +217,6 @@ function ProfilePictureModal({
 
   const clearImage = useCallback(() => {
     setPreviewImage(null);
-    setSelectedFile(null);
     setUploadedUrl(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
