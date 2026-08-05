@@ -4,6 +4,12 @@
 This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
 <!-- END:nextjs-agent-rules -->
 
+# Architecture
+
+Where code lives — directory shape, file naming, layer boundaries, import direction — is
+governed by [`ARCHITECTURE.md`](./ARCHITECTURE.md), not this file. Read it before adding a
+new file or moving an existing one.
+
 # Code Standards
 
 Code here should read like a well-kept open-source TS/React library. ESLint (`eslint-config-next`) and `tsc --strict` already own formatting, unused vars, and basic type safety — the rules below cover what tooling can't check.

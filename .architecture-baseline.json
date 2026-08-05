@@ -1,0 +1,38 @@
+[
+  {
+    "rule": "db-client-construction",
+    "file": "drizzle/install-extensions.ts"
+  },
+  {
+    "rule": "db-client-construction",
+    "file": "drizzle/reset.ts"
+  },
+  {
+    "rule": "db-client-construction",
+    "file": "drizzle/seed-shuls.ts"
+  },
+  {
+    "rule": "db-client-construction",
+    "file": "drizzle/seed.ts"
+  },
+  {
+    "rule": "bad-filename",
+    "file": "components/logo copy.tsx"
+  },
+  {
+    "rule": "bad-filename",
+    "file": "data/synagogues (1).json"
+  },
+  {
+    "rule": "naming-case",
+    "file": "components/logo copy.tsx"
+  },
+  {
+    "rule": "stray-asset-in-source-tree",
+    "file": "components/icon.PNG"
+  },
+  {
+    "rule": "size-budget",
+    "file": "app/(auth)/onboarding/page.tsx"
+  }
+]
