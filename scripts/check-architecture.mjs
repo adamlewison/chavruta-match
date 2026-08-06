@@ -131,7 +131,11 @@ for (const file of sourceFiles) {
   const rel = relative(ROOT, file);
   const parts = rel.split("/");
   for (const part of parts) {
-    const withoutExt = part.replace(/\.(tsx?|d\.ts)$/, "");
+    // Test files are `<module>.test.ts` per TESTING.md — the `.test` segment is a
+    // convention marker, not part of the name, so it's stripped before the check.
+    const withoutExt = part
+      .replace(/\.(tsx?|d\.ts)$/, "")
+      .replace(/\.(test|spec)$/, "");
     const { value: stripped, dynamic } = stripRouteSyntax(withoutExt);
     if (dynamic || stripped.length === 0) continue;
     if (!KEBAB_RE.test(stripped)) {

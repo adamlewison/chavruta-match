@@ -5,7 +5,7 @@
 // The baseline should only ever shrink.
 
 import { readFileSync, readdirSync, existsSync } from "node:fs";
-import { join, relative, basename } from "node:path";
+import { join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = fileURLToPath(new URL("..", import.meta.url));
