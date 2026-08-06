@@ -1,20 +1,27 @@
-import { regions } from "@/lib/db/schema";
-import { db, client } from "@/lib/db";
+import { client } from "@/lib/db";
+import { seedRegions, seedSynagogues } from "@/drizzle/seed-reference";
 
+/**
+ * Seeds reference data only — regions and the synagogue list. Contains no user data,
+ * so this is the seeder that is safe to run against any environment, production
+ * included. For a browsable preview environment use `db:seed:preview` instead.
+ */
 async function main() {
-  await db.insert(regions).values({
-    slug: "london",
-    name: "London",
-    timezone: "Europe/London",
-    countryCode: "GB",
-    active: true,
-  }).onConflictDoNothing({ target: regions.slug });
+  const regionId = await seedRegions();
+  const synagogueCount = await seedSynagogues(regionId);
 
-  console.log("Seeded London region");
+  console.log(`[seed] region london (id ${regionId})`);
+  console.log(
+    synagogueCount > 0
+      ? `[seed] ${synagogueCount} synagogues`
+      : "[seed] synagogues already present, skipped",
+  );
+
   await client.end();
 }
 
-main().catch((err) => {
-  console.error(err);
+main().catch(async (err) => {
+  console.error("[seed] failed:", err);
+  await client.end();
   process.exit(1);
 });

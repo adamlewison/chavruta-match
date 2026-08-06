@@ -1,0 +1,158 @@
+name: Preview environment
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+# Supersede an in-flight preview when new commits land — the older deployment would
+# point at the same Neon branch and finish out of order.
+concurrency:
+  group: preview-${{ github.event.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+
+env:
+  # Pinned so a CLI release cannot change deployment behaviour without a commit.
+  VERCEL_CLI_VERSION: "58.7.1"
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+jobs:
+  preview:
+    name: Database branch and preview deploy
+    runs-on: ubuntu-latest
+    # Pull requests from forks run without access to secrets, so every step below
+    # would fail on an empty token. Skip rather than fail: CI still gates the PR.
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # A safety net for branches this workflow never gets to clean up — a run
+      # cancelled mid-flight, or a repository transfer. Neon removes the branch on
+      # this date even if preview-cleanup.yml never fires.
+      - name: Compute branch expiry
+        run: echo "EXPIRES_AT=$(date -u --date '+14 days' +'%Y-%m-%dT%H:%M:%SZ')" >> "$GITHUB_ENV"
+
+      # Copy-on-write from preview-base, so the branch is ready in seconds and starts
+      # with the curated demo dataset rather than production data.
+      - name: Create Neon branch
+        id: neon
+        uses: neondatabase/create-branch-action@v6
+        with:
+          project_id: ${{ vars.NEON_PROJECT_ID }}
+          parent_branch: preview-base
+          branch_name: preview/pr-${{ github.event.number }}
+          api_key: ${{ secrets.NEON_API_KEY }}
+          expires_at: ${{ env.EXPIRES_AT }}
+
+      # Inherited from preview-base on first creation; re-run because CREATE EXTENSION
+      # IF NOT EXISTS is free and a rebuilt parent would otherwise leave the branch
+      # without the extensions lib/queries.ts needs (ll_to_earth).
+      - name: Install Postgres extensions
+        env:
+          DATABASE_URL: ${{ steps.neon.outputs.db_url }}
+        run: npm run db:extensions
+
+      # The point of the preview database: this PR's migrations run against a branch
+      # that already holds rows, which is where migrations actually break.
+      - name: Apply migrations
+        env:
+          DATABASE_URL: ${{ steps.neon.outputs.db_url }}
+        run: npm run db:migrate
+
+      # A no-op when the branch already carries preview-base's data; fills in anything
+      # a new migration added.
+      - name: Seed
+        env:
+          DATABASE_URL: ${{ steps.neon.outputs.db_url }}
+        run: npm run db:seed:preview
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel@${{ env.VERCEL_CLI_VERSION }}
+
+      - name: Pull Vercel preview environment
+        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+
+      # vercel build reads build-time env from the pulled file, so the project-level
+      # DATABASE_URL is replaced there with this PR's branch. `vercel deploy --env`
+      # below covers the runtime side; both are needed.
+      - name: Point the build at this PR's database
+        env:
+          NEON_DB_URL: ${{ steps.neon.outputs.db_url }}
+        run: |
+          ENV_FILE=.vercel/.env.preview.local
+          touch "$ENV_FILE"
+          grep -v '^DATABASE_URL=' "$ENV_FILE" > "$ENV_FILE.tmp" || true
+          mv "$ENV_FILE.tmp" "$ENV_FILE"
+          printf 'DATABASE_URL="%s"\n' "$NEON_DB_URL" >> "$ENV_FILE"
+
+      # Building here rather than on Vercel keeps the artifact identical to the one CI
+      # validated, and avoids paying for the same build twice.
+      - name: Build
+        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy
+        id: deploy
+        env:
+          NEON_DB_URL: ${{ steps.neon.outputs.db_url }}
+        run: |
+          url=$(vercel deploy --prebuilt \
+            --env DATABASE_URL="$NEON_DB_URL" \
+            --token=${{ secrets.VERCEL_TOKEN }})
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+
+      - name: Comment the preview details on the PR
+        uses: actions/github-script@v7
+        env:
+          PREVIEW_URL: ${{ steps.deploy.outputs.url }}
+          NEON_BRANCH: preview/pr-${{ github.event.number }}
+        with:
+          script: |
+            const marker = '<!-- vruta-preview -->';
+            const body = [
+              marker,
+              '### Preview environment',
+              '',
+              `| | |`,
+              `|---|---|`,
+              `| Preview | ${process.env.PREVIEW_URL} |`,
+              `| Neon branch | \`${process.env.NEON_BRANCH}\` |`,
+              `| Commit | ${context.payload.pull_request.head.sha.slice(0, 7)} |`,
+              '',
+              'Seeded with demo accounts on `@vruta.test`. The database branch is',
+              'deleted when this PR closes.',
+            ].join('\n');
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const existing = comments.find((c) => c.body.includes(marker));
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }

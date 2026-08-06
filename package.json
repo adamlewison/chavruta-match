@@ -11,12 +11,14 @@
     "test": "vitest run",
     "test:check": "node scripts/check-tests.mjs",
     "architecture:check": "node scripts/check-architecture.mjs",
-    "db:generate": "node --env-file=.env.local ./node_modules/drizzle-kit/bin.cjs generate",
-    "db:push": "node --env-file=.env.local ./node_modules/drizzle-kit/bin.cjs push",
-    "db:migrate": "node --env-file=.env.local ./node_modules/drizzle-kit/bin.cjs migrate",
-    "db:extensions": "npx tsx --env-file .env.local drizzle/install-extensions.ts",
-    "db:seed": "npx tsx --env-file .env.local drizzle/seed.ts",
-    "db:reset": "npx tsx --env-file .env.local drizzle/reset.ts"
+    "db:generate": "node --env-file-if-exists=.env.local ./node_modules/drizzle-kit/bin.cjs generate",
+    "db:push": "node --env-file-if-exists=.env.local ./node_modules/drizzle-kit/bin.cjs push",
+    "db:migrate": "node --env-file-if-exists=.env.local ./node_modules/drizzle-kit/bin.cjs migrate",
+    "db:check": "node --env-file-if-exists=.env.local ./node_modules/drizzle-kit/bin.cjs check",
+    "db:extensions": "node --env-file-if-exists=.env.local --import tsx drizzle/install-extensions.ts",
+    "db:seed": "node --env-file-if-exists=.env.local --import tsx drizzle/seed.ts",
+    "db:seed:preview": "node --env-file-if-exists=.env.local --import tsx drizzle/seed-preview.ts",
+    "db:reset": "node --env-file-if-exists=.env.local --import tsx drizzle/reset.ts"
   },
   "dependencies": {
     "@auth/drizzle-adapter": "^1.11.2",
@@ -57,6 +59,7 @@
     "eslint-config-next": "16.2.4",
     "eslint-plugin-vitest": "^0.5.4",
     "tailwindcss": "^4",
+    "tsx": "^4.23.9",
     "typescript": "^5",
     "vitest": "^4.1.10"
   }

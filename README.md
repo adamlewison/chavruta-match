@@ -75,10 +75,13 @@ Fill in required environment variables including database URL, auth secrets, and
 4. Set up the database:
 
 ```bash
-npm run db:generate
-npm run db:push
-npm run db:seed
+npm run db:extensions   # postgis, cube, earthdistance
+npm run db:migrate      # apply the committed migrations
+npm run db:seed         # regions and the synagogue list
 ```
+
+Optionally, `npm run db:seed:preview` adds demo accounts and study profiles so the app
+has something to show. It refuses to run against a database holding real accounts.
 
 5. Start the development server:
 
@@ -106,10 +109,18 @@ The app uses Drizzle ORM with PostgreSQL. Key tables include:
 - `npm run build` - Build for production
 - `npm run start` - Start production server
 - `npm run lint` - Run ESLint
-- `npm run db:generate` - Generate database migrations
-- `npm run db:push` - Push schema changes to database
-- `npm run db:seed` - Seed initial data
-- `npm run db:reset` - Reset database
+- `npm run db:generate` - Generate a migration from `lib/db/schema.ts`
+- `npm run db:migrate` - Apply the committed migrations
+- `npm run db:check` - Validate migration history
+- `npm run db:push` - Push schema straight to the database (local experiments only)
+- `npm run db:seed` - Seed reference data (regions, synagogues)
+- `npm run db:seed:preview` - Seed reference data plus demo accounts
+- `npm run db:reset` - Drop and recreate the schema (destructive)
+
+## Deployment
+
+CI, per-PR preview environments, and production deploys are documented in
+[`DEPLOYMENT.md`](./DEPLOYMENT.md).
 
 ## Project Structure
 

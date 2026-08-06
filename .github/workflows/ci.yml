@@ -11,8 +11,11 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
+permissions:
+  contents: read
+
 jobs:
-  ci:
+  quality:
     name: Lint, typecheck, test
     runs-on: ubuntu-latest
     steps:
@@ -42,3 +45,96 @@ jobs:
 
       - name: Test-suite guard
         run: npm run test:check
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    # The production build imports modules that construct API clients at load time
+    # (Resend in app/api/auth/send-passcode/route.ts), so those keys must be present
+    # or page-data collection throws. Placeholders are enough — nothing is called
+    # during the build, and no database connection is opened.
+    env:
+      DATABASE_URL: postgres://build:build@127.0.0.1:5432/unused
+      AUTH_SECRET: ci-placeholder-not-a-real-secret
+      RESEND_API_KEY: re_ci_placeholder
+      RESEND_FROM_EMAIL: ci@vruta.test
+      AUTH_GOOGLE_ID: ci-placeholder
+      AUTH_GOOGLE_SECRET: ci-placeholder
+      UPLOADTHING_TOKEN: ci-placeholder
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+  schema:
+    name: Migrations & schema drift
+    runs-on: ubuntu-latest
+    # A disposable Postgres proves migrations apply to an empty database on every PR,
+    # for free and in seconds. The preview environment (see preview.yml) is what
+    # exercises them against pre-existing rows — the two checks answer different
+    # questions, which is why both exist.
+    services:
+      postgres:
+        image: postgis/postgis:17-3.5
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: vruta_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgres://postgres:postgres@127.0.0.1:5432/vruta_ci
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Catches a migration file renamed, deleted, or given a colliding index.
+      - name: Validate migration history
+        run: npm run db:check
+
+      - name: Install Postgres extensions
+        run: npm run db:extensions
+
+      - name: Apply every migration from scratch
+        run: npm run db:migrate
+
+      # drizzle-kit writes a new migration whenever schema.ts and the committed
+      # snapshot disagree. If it produces one here, someone edited schema.ts without
+      # running db:generate — the change would reach production as untracked drift.
+      - name: Fail if schema.ts has drifted from the migrations
+        run: |
+          npm run db:generate
+          if [ -n "$(git status --porcelain -- drizzle)" ]; then
+            echo "::error::schema.ts does not match the committed migrations."
+            echo "Run 'npm run db:generate' locally and commit the generated files."
+            git status --porcelain -- drizzle
+            git diff -- drizzle
+            exit 1
+          fi
+          echo "No drift: schema.ts matches the committed migrations."
+
+      # Seeding is part of the contract — a seed that has drifted from the schema
+      # would otherwise only be discovered when a preview environment fails to build.
+      - name: Seed
+        run: npm run db:seed:preview

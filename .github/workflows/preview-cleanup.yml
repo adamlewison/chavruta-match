@@ -1,0 +1,23 @@
+name: Preview cleanup
+
+on:
+  pull_request:
+    types: [closed]
+
+permissions:
+  contents: read
+
+jobs:
+  delete-branch:
+    name: Delete the PR's Neon branch
+    runs-on: ubuntu-latest
+    # Matches preview.yml: fork PRs never got a branch, so there is nothing to delete
+    # and no secrets to do it with.
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    steps:
+      - name: Delete Neon branch
+        uses: neondatabase/delete-branch-action@v3
+        with:
+          project_id: ${{ vars.NEON_PROJECT_ID }}
+          branch: preview/pr-${{ github.event.number }}
+          api_key: ${{ secrets.NEON_API_KEY }}
