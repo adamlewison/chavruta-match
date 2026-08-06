@@ -16,3 +16,5 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run architecture:check
+      - run: npm test
+      - run: npm run test:check

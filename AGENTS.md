@@ -42,3 +42,14 @@ Code here should read like a well-kept open-source TS/React library. ESLint (`es
 - Delegate mechanical, verifiable work — bulk renames, writing tests to a spec, gathering info across many files — to a subagent; keep architecture decisions and final review on the main thread.
 - Parallelize only genuinely independent tasks; never two agents touching the same file.
 - Always say when work is delegated, what it covers, and which model is doing it.
+
+# Testing
+
+Full rules in [`TESTING.md`](./TESTING.md). Short version:
+
+- **Write a test for**: a bug fix (first, before fixing), critical-path auth/permissions/data mutation, dense logic with a branching input space, a published contract.
+- **Don't write a test for**: getters, constants, pass-throughs, what the type system proves, framework behaviour, anything added for coverage.
+- **Runner**: Vitest (`npm test`). One runner — don't add a second.
+- **New tests match the shape of**: [`lib/availability.test.ts`](lib/availability.test.ts) (tier-3 unit reference).
+- **Fakes stop at the system edge**: never mock your own modules. If a unit is only testable via an internal mock, that's a design finding — push the side effects out.
+- **No coverage gate, ever.** Coverage is a diagnostic.
