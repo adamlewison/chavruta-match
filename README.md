@@ -111,6 +111,28 @@ The app uses Drizzle ORM with PostgreSQL. Key tables include:
 - `npm run db:seed` - Seed initial data
 - `npm run db:reset` - Reset database
 
+## Continuous Integration
+
+Two workflows run on every pull request:
+
+- **CI** (`.github/workflows/ci.yml`) — lint, typecheck, tests, and the architecture
+  and test-suite guards. This is the one that should gate merges.
+- **AI review** (`.github/workflows/ai-review.yml`) — a model reads the PR diff and
+  leaves a single summary comment. Advisory only; it never blocks a merge.
+
+The AI review needs an `AI_GATEWAY_API_KEY` repository secret (a
+[Vercel AI Gateway](https://vercel.com/docs/ai-gateway) key). Without it the job
+skips itself and passes, so the workflow is safe to leave in place unconfigured —
+pull requests from forks skip it too, since forks never receive secrets. To use a
+different model, set an `AI_REVIEW_MODEL` repository variable to any gateway model
+ID; it defaults to `google/gemini-2.5-flash-lite`.
+
+Preview the exact prompt a PR would send, without an API key or a network call:
+
+```bash
+BASE_SHA=$(git merge-base origin/main HEAD) node scripts/ai-review.mjs --dry-run
+```
+
 ## Project Structure
 
 ```

@@ -1,0 +1,52 @@
+name: AI review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+# Only the newest push to a PR gets reviewed — superseded runs are cancelled so
+# nobody pays for a review of code that has already been replaced.
+concurrency:
+  group: ai-review-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  review:
+    name: AI review
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    # Advisory check. Never let a review problem block a merge.
+    continue-on-error: true
+    env:
+      AI_GATEWAY_API_KEY: ${{ secrets.AI_GATEWAY_API_KEY }}
+    steps:
+      # Without the key (not configured, or a fork PR, which never receives
+      # secrets) every step below is skipped and the job passes.
+      - uses: actions/checkout@v4
+        if: env.AI_GATEWAY_API_KEY != ''
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          # Full history so the base commit exists locally and the PR diff can be
+          # computed with git rather than another API call.
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        if: env.AI_GATEWAY_API_KEY != ''
+        with:
+          node-version: 22
+
+      # No `npm ci` — the script uses only Node builtins, so the review starts
+      # in seconds instead of waiting on a dependency install.
+      - name: Review changed files
+        if: env.AI_GATEWAY_API_KEY != ''
+        run: node scripts/ai-review.mjs
+        env:
+          AI_REVIEW_MODEL: ${{ vars.AI_REVIEW_MODEL }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}

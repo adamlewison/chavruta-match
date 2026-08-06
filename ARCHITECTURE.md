@@ -64,6 +64,7 @@ vruta/
 │   └── *.ts                     # seed/reset/etc. — import { db, client } from "@/lib/db"
 ├── types/                        # Ambient / module-augmentation types only (e.g. next-auth.d.ts)
 ├── data/                         # Static seed/reference data files consumed by drizzle/*.ts
+├── scripts/                      # CI-only Node scripts (`.mjs`, no build step, no deps)
 └── public/                       # Static assets served as-is
 ```
 
