@@ -5,7 +5,8 @@ layer boundaries, and import direction. It is prescriptive, not a tour — if th
 from this document, either the tree or the document is wrong, and one of them gets fixed.
 
 For *how* code is written (doc comments, function shape, types, error values) see `AGENTS.md`.
-There is no `TESTING.md` yet — this document doesn't govern test placement until one exists.
+For what gets tested and how, see [`TESTING.md`](./TESTING.md); this document owns only
+where test files sit and what they're called.
 
 Stack: Next.js 16 (App Router only), React 19, TypeScript 5 (`strict`), Drizzle ORM +
 Postgres, NextAuth v5. Single package, no `src/` directory, npm.
@@ -71,6 +72,7 @@ vruta/
 | Entity | Rule | Example |
 |---|---|---|
 | Files & directories | kebab-case, always | `match-card.tsx`, `tentacles/new/` |
+| Test file | `<module>.test.ts`, colocated beside the module it covers | `lib/availability.ts` → `lib/availability.test.ts` |
 | Dynamic route segment | framework-mandated brackets | `[id]/`, `[...nextauth]/` |
 | Private route folder | `_name`, not routable | `onboarding/_components/` |
 | Route group | `(name)`, omitted from URL | `(app)/`, `(auth)/` |
